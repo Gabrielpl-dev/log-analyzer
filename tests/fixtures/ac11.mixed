@@ -1,0 +1,4 @@
+{"timestamp":"2026-01-01T00:00:00Z","level":"info","status":200,"path":"/a"}
+{"timestamp":"2026-01-01T00:00:01Z","level":"error","status":500,"path":"/b"}
+127.0.0.1 - - [10/Oct/2000:13:55:36 -0700] "GET /index.html HTTP/1.0" 200 2326 "-" "curl/8.0"
+10.0.0.1 - - [10/Oct/2000:13:55:36 -0700] "GET /health HTTP/1.1" 404 0
