@@ -762,6 +762,8 @@ def write_report(path: str, content: str) -> None:
     if path == "-":
         sys.stdout.write(content)
         return
+    if os.path.isdir(path):
+        raise InputError(f"cannot write output file: {path}: is a directory")
     directory = os.path.dirname(os.path.abspath(path))
     try:
         fd, tmp = tempfile.mkstemp(dir=directory, prefix=".log-analyzer-")
