@@ -16,7 +16,7 @@ import re
 import sys
 import tempfile
 from datetime import UTC, datetime, timedelta, timezone
-from decimal import ROUND_HALF_UP, Decimal
+from decimal import ROUND_HALF_UP, Decimal, localcontext
 
 VERSION = "0.1.0"
 SCHEMA_VERSION = "0.1"
@@ -92,7 +92,11 @@ class InputError(Exception):
 
 def _quantize(value: float, places: int) -> Decimal:
     exp = Decimal(1).scaleb(-places)
-    return Decimal(repr(float(value))).quantize(exp, rounding=ROUND_HALF_UP)
+    decimal_value = Decimal(repr(float(value)))
+    with localcontext() as context:
+        # Leave room for the integer part, decimal places and a rounding carry.
+        context.prec = max(context.prec, decimal_value.adjusted() + places + 2)
+        return decimal_value.quantize(exp, rounding=ROUND_HALF_UP)
 
 
 def round_json(value: float) -> float:
@@ -217,10 +221,13 @@ def _coerce_latency(value: object) -> float | None:
     if isinstance(value, bool):
         return None
     if isinstance(value, (int, float)):
-        latency = float(value)
+        try:
+            latency = float(value)
+        except OverflowError:
+            return None
     else:
         return None
-    if math.isnan(latency) or latency < 0:
+    if not math.isfinite(latency) or latency < 0:
         return None
     return latency
 
@@ -311,7 +318,7 @@ def _coerce_latency_token(token: str) -> float | None:
         value = float(token)
     except ValueError:
         return None
-    if math.isnan(value) or value < 0:
+    if not math.isfinite(value) or value < 0:
         return None
     return value
 
@@ -412,7 +419,8 @@ def latency_stats(records: list[dict]) -> dict | None:
     if not values:
         return None
     count = len(values)
-    mean = sum(values) / count
+    total = sum(values)
+    mean = total / count if math.isfinite(total) else sum(value / count for value in values)
     return {
         "count": count,
         "min": values[0],
@@ -479,29 +487,33 @@ def compute_anomalies(records: list[dict], window_ms: int, k: float, metric: str
     w_last = max(timestamps) // window_ms
     windows_total = w_last - w_first + 1
 
-    totals = [0] * windows_total
-    errors = [0] * windows_total
+    totals: dict[int, int] = {}
+    errors: dict[int, int] = {}
     for record in timed:
         index = record["timestamp_ms"] // window_ms - w_first
-        totals[index] += 1
+        totals[index] = totals.get(index, 0) + 1
         if record["status"] is not None and 500 <= record["status"] <= 599:
-            errors[index] += 1
+            errors[index] = errors.get(index, 0) + 1
 
     if metric == "count":
-        values = [float(total) for total in totals]
+        values = {i: float(total) for i, total in totals.items()}
     elif metric == "errors_rate":
-        values = [errors[i] / totals[i] if totals[i] else 0.0 for i in range(windows_total)]
+        values = {i: errors.get(i, 0) / total for i, total in totals.items()}
     else:
-        values = [float(count) for count in errors]
+        values = {i: float(errors.get(i, 0)) for i in totals}
 
-    mean = sum(values) / windows_total
-    variance = sum((value - mean) ** 2 for value in values) / windows_total
+    mean = sum(values.values()) / windows_total
+    # Empty windows have value zero; account for them without allocating them.
+    empty_windows = windows_total - len(values)
+    variance = (
+        sum((value - mean) ** 2 for value in values.values()) + empty_windows * mean ** 2
+    ) / windows_total
     stddev = math.sqrt(variance)
     threshold = mean + k * stddev
 
     anomalies = []
     if stddev > 0:
-        for i, value in enumerate(values):
+        for i, value in sorted(values.items()):
             if value > threshold:
                 start = (w_first + i) * window_ms
                 anomalies.append(

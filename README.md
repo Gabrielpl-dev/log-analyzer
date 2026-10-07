@@ -2,8 +2,10 @@
 
 One CLI that reads JSON-lines, nginx combined and apache common logs, normalizes
 every line into a single record model, and prints a summary, rankings,
-time-window anomaly detection and a Markdown report — streaming from a file or
-from `stdin`, never crashing on a bad line.
+time-window anomaly detection and a Markdown report. Input comes from a file or
+`stdin`; invalid lines are skipped and counted. The entire input is read before
+processing, and normalized records are retained in memory.
+Memory usage grows with the input size.
 
 <p align="center">
   <img src="docs/demo.gif" alt="log-analyzer terminal demo" width="820"/>
