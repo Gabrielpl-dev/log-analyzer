@@ -1,0 +1,5 @@
+{"timestamp":"2026-01-01T00:00:00Z","level":"info","status":200,"path":"/a","latency_ms":10}
+{"timestamp":"2026-01-01T00:00:05Z","level":"error","status":500,"path":"/b","latency_ms":20}
+{"timestamp":"2026-01-01T00:00:10Z","level":"info","status":200,"path":"/a","latency_ms":30}
+{"timestamp":"2026-01-01T00:00:15Z","level":"error","status":503,"path":"/b","latency_ms":40}
+{"timestamp":"2026-01-01T00:00:20Z","level":"info","status":200,"path":"/a","latency_ms":50}

@@ -1,0 +1,16 @@
+{"timestamp": "2026-01-01T00:00:10Z", "status": 200, "path": "/x"}
+{"timestamp": "2026-01-01T00:01:10Z", "status": 500, "path": "/x"}
+{"timestamp": "2026-01-01T00:01:20Z", "status": 200, "path": "/x"}
+{"timestamp": "2026-01-01T00:02:10Z", "status": 200, "path": "/x"}
+{"timestamp": "2026-01-01T00:03:10Z", "status": 503, "path": "/x"}
+{"timestamp": "2026-01-01T00:03:20Z", "status": 200, "path": "/x"}
+{"timestamp": "2026-01-01T00:04:10Z", "status": 200, "path": "/x"}
+{"timestamp": "2026-01-01T00:05:10Z", "status": 500, "path": "/x"}
+{"timestamp": "2026-01-01T00:05:20Z", "status": 500, "path": "/x"}
+{"timestamp": "2026-01-01T00:05:30Z", "status": 500, "path": "/x"}
+{"timestamp": "2026-01-01T00:05:40Z", "status": 500, "path": "/x"}
+{"timestamp": "2026-01-01T00:05:50Z", "status": 500, "path": "/x"}
+{"timestamp": "2026-01-01T00:05:59Z", "status": 500, "path": "/x"}
+{"timestamp": "2026-01-01T00:05:11Z", "status": 500, "path": "/x"}
+{"timestamp": "2026-01-01T00:05:12Z", "status": 500, "path": "/x"}
+{"timestamp": "2026-01-01T00:05:13Z", "status": 200, "path": "/x"}
